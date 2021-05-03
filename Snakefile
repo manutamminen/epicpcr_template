@@ -220,3 +220,18 @@ rule align_outgrouped_sequences:
     --db {input.euk_db}
     """
 
+
+rule infer_phylogenies:
+  input:
+    bact_aligned = "data/alignment/16S_seqs_outgroup_align.fasta",
+    euk_aligned = "data/alignment/18S_seqs_outgroup_align.fasta"
+  output:
+    bact_tree = "data/trees/16S.tre",
+    euk_tree = "data/trees/18S.tre"
+  conda:
+    "envs/fasttree.yaml"
+  shell:
+    """
+    fasttree -nt {input.bact_aligned} > {output.bact_tree} &&\
+    fasttree -nt {input.euk_aligned} > {output.euk_tree}
+    """
