@@ -1,5 +1,5 @@
 #########
-# Prepare databases etc
+# Prepare databases
 #########
 
 rule download_tax_db:
@@ -33,7 +33,7 @@ rule prepare_tax_dbs:
 
 
 #########
-# Prepare sequences etc
+# Prepare sequences
 #########
 
 IDs, = glob_wildcards("data/raw/{id}_L001_R1_001.fastq.gz")
@@ -110,6 +110,10 @@ rule cluster:
     """
 
 
+#########
+# Prepare taxonomies
+#########
+
 rule taxonomy:
   input:
     bact="data/clustered/16S_seqs_centroids.fasta",
@@ -138,13 +142,13 @@ rule taxonomy:
 
 rule collapse_taxonomy:
   input:
-    bact_centroids_tax="data/taxonomy/16S_seqs_centroids_tax.txt",
-    bact_centroids_fasta="data/clustered/16S_seqs_centroids.fasta",
-    euk_centroids_tax="data/taxonomy/18S_seqs_centroids_tax.txt",
-    euk_centroids_fasta="data/clustered/18S_seqs_centroids.fasta"
+    "data/taxonomy/16S_seqs_centroids_tax.txt",
+    "data/clustered/16S_seqs_centroids.fasta",
+    "data/taxonomy/18S_seqs_centroids_tax.txt",
+    "data/clustered/18S_seqs_centroids.fasta"
   output:
-    bact_otu_seqs="taxonomy/16S_otu_sequences.txt",
-    euk_otu_seqs="taxonomy/18S_otu_sequences.txt"
+    "data/taxonomy/16S_otu_sequences.txt",
+    "data/taxonomy/18S_otu_sequences.txt"
   script:
     "src/data/collapse_taxonomy.py"
 
@@ -168,9 +172,13 @@ rule complete_taxonomy:
   input:
     "data/taxonomy/16S_bc_tax.txt",
     "data/taxonomy/18S_bc_tax.txt",
-    "taxonomy/16S_otu_sequences.txt",
-    "taxonomy/18S_otu_sequences.txt"
+    "data/taxonomy/16S_otu_sequences.txt",
+    "data/taxonomy/18S_otu_sequences.txt"
 
+
+#########
+# Prepare alignments
+#########
 
 rule add_outgroups:
   input:
@@ -183,9 +191,26 @@ rule add_outgroups:
     "src/data/add_outgroups.py"
 
 
-
-
-#  /homeappl/home/matammi/sina-1.2.11/sina -i all_18.otus.outgroup.fasta --intype fasta -o all_18.otus.align.fasta --outtype fasta --ptdb /wrk/matammi/sina/SILVA_132_SSURef_NR99_13_12_17_opt.arb
-#
-#  /homeappl/home/matammi/sina-1.2.11/sina -i all_16.otus.outgroup.fasta --intype fasta -o all_16.otus.align.fasta --outtype fasta --ptdb /wrk/matammi/sina/SSURef_NR99_128_SILVA_07_09_16_opt.arb
+rule align_outgrouped_sequences:
+  input:
+    bact_outgrouped = "data/alignment/16S_seqs_outgroup.fasta",
+    euk_outgrouped = "data/alignment/18S_seqs_outgroup.fasta"
+  output:
+    bact_aligned = "data/alignment/16S_seqs_outgroup_align.fasta",
+    euk_aligned = "data/alignment/18S_seqs_outgroup_align.fasta"
+  conda:
+    "envs/sina.yaml"
+  shell:
+    """
+    sina -i {input.bact_outgrouped} \
+    --intype fasta \
+    -o {output.bact_aligned} \
+    --outtype fasta \
+    --ptdb data/external/aln-dbs/SILVA_132_SSURef_NR99_13_12_17_opt.arb.gz &&\
+    sina -i {input.euk_outgrouped} \
+    --intype fasta \
+    -o {output.euk_aligned} \
+    --outtype fasta \
+    --ptdb data/external/aln-dbs/SSURef_NR99_128_SILVA_07_09_16_opt.arb.gz
+    """
 

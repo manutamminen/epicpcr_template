@@ -33,8 +33,8 @@ def process_fasta(fasta, ribo_type):
     for ix, (seq_id, seq) in enumerate(read_fasta(fasta)):
         if len(seq) > 100 and len(seq.split("GATCATGACCCATTTGGAGAAGATG")) == 2:
             line_acc = []
-            line_acc.append(fasta.split(".")[0].split("/")[-1])
-            line_acc.append(fasta.split(".")[0].split("/")[-1] + "_" + str(ix))
+            line_acc.append(fasta.rsplit("/", 1)[1].split("_filtered")[0])
+            line_acc.append(fasta.rsplit("/", 1)[1].split("_filtered")[0] + "_" + str(ix))
             bc, ribo = seq.split("GATCATGACCCATTTGGAGAAGATG")
             if ribo_type == "18S":
                 try:

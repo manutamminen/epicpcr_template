@@ -1,4 +1,4 @@
 channels:
   - bioconda
 dependencies:
-  - vsearch =2.15
+  - sina >= 1.7.2
