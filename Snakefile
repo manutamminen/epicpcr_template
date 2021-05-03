@@ -11,18 +11,22 @@ rule download_tax_db:
 
 rule download_aln_db:
   output:
-    directory("data/external/aln-dbs/")
+    "data/external/aln-dbs/SILVA_132_SSURef_NR99_13_12_17_opt.arb",
+    "data/external/aln-dbs/SSURef_NR99_128_SILVA_07_09_16_opt.arb"
   shell:
-    "mkdir {output} && "
-    "curl https://www.arb-silva.de/fileadmin/arb_web_db/release_132/ARB_files/SILVA_132_SSURef_NR99_13_12_17_opt.arb.gz "
-    "-o {output}/SILVA_132_SSURef_NR99_13_12_17_opt.arb.gz && "
-    "curl https://www.arb-silva.de/fileadmin/arb_web_db/release_128/ARB_files/SSURef_NR99_128_SILVA_07_09_16_opt.arb.gz "
-    "-o {output}/SSURef_NR99_128_SILVA_07_09_16_opt.arb.gz"
+    """
+    mkdir -p data/external/aln-dbs &&\
+    cd data/external/aln-dbs &&\
+    wget https://www.arb-silva.de/fileadmin/arb_web_db/release_132/ARB_files/SILVA_132_SSURef_NR99_13_12_17_opt.arb.gz &&\
+    wget https://www.arb-silva.de/fileadmin/arb_web_db/release_128/ARB_files/SSURef_NR99_128_SILVA_07_09_16_opt.arb.gz &&\
+    gunzip *.gz
+    """
 
 
 rule prepare_tax_dbs:
   input:
-    "data/external/aln-dbs/",
+    "data/external/aln-dbs/SILVA_132_SSURef_NR99_13_12_17_opt.arb",
+    "data/external/aln-dbs/SSURef_NR99_128_SILVA_07_09_16_opt.arb",
     "SILVA_138.1_SSURef_NR99_tax_silva_trunc.fasta.gz"
   output:
     "data/external/tax-dbs/16S_db.fasta",
@@ -194,7 +198,9 @@ rule add_outgroups:
 rule align_outgrouped_sequences:
   input:
     bact_outgrouped = "data/alignment/16S_seqs_outgroup.fasta",
-    euk_outgrouped = "data/alignment/18S_seqs_outgroup.fasta"
+    euk_outgrouped = "data/alignment/18S_seqs_outgroup.fasta",
+    bact_db = "data/external/aln-dbs/SSURef_NR99_128_SILVA_07_09_16_opt.arb",
+    euk_db = "data/external/aln-dbs/SILVA_132_SSURef_NR99_13_12_17_opt.arb"
   output:
     bact_aligned = "data/alignment/16S_seqs_outgroup_align.fasta",
     euk_aligned = "data/alignment/18S_seqs_outgroup_align.fasta"
@@ -206,11 +212,11 @@ rule align_outgrouped_sequences:
     --intype fasta \
     -o {output.bact_aligned} \
     --outtype fasta \
-    --ptdb data/external/aln-dbs/SILVA_132_SSURef_NR99_13_12_17_opt.arb.gz &&\
+    --db {input.bact_db} &&\
     sina -i {input.euk_outgrouped} \
     --intype fasta \
     -o {output.euk_aligned} \
     --outtype fasta \
-    --ptdb data/external/aln-dbs/SSURef_NR99_128_SILVA_07_09_16_opt.arb.gz
+    --db {input.euk_db}
     """
 

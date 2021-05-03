@@ -152,6 +152,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format=log_fmt)
     logger = logging.getLogger(__name__)
     logger.info('Setting up the 16S and 18S rRNA databases...')
-    prepare_database(snakemake.input[1],
+    prepare_database(snakemake.input[2],
             snakemake.output[0],
             snakemake.output[1])

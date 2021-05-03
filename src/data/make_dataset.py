@@ -26,7 +26,7 @@ def read_fasta(fasta, remove_commas=False):
 
 
 def process_fasta(fasta, ribo_type):
-    """ Split a sequence at a barcode and only keep those where the total 
+    """ Split a sequence at a barcode and only keep those where the total
     sequence is > 100 bp and the barcode 20 bp.
     """
     seq_acc = []
