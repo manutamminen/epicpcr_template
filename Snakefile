@@ -166,19 +166,23 @@ rule annotate_bcs:
     "data/taxonomy/18S_seqs_centroids_tax.txt",
     "data/combined/18S_bcs.csv"
   output:
-    "data/taxonomy/16S_bc_tax.txt",
-    "data/taxonomy/18S_bc_tax.txt"
+    "data/final/16S_bc_tax.txt",
+    "data/final/18S_bc_tax.txt"
   script:
     "src/data/annotate_bcs.py"
 
 
 rule complete_taxonomy:
   input:
-    "data/taxonomy/16S_bc_tax.txt",
-    "data/taxonomy/18S_bc_tax.txt",
-    "data/taxonomy/16S_otu_sequences.txt",
-    "data/taxonomy/18S_otu_sequences.txt"
-
+    bact_bc_tax="data/final/16S_bc_tax.txt",
+    euk_bc_tax="data/final/18S_bc_tax.txt",
+    bact_otu_seqs="data/taxonomy/16S_otu_sequences.txt",
+    euk_otu_seqs="data/taxonomy/18S_otu_sequences.txt"
+  output:
+    bact_seqs="data/final/16S.fasta",
+    euk_seqs="data/final/18S.fasta"
+  script:
+    "src/data/prepare_tax_fastas.py"
 
 #########
 # Prepare alignments
@@ -186,24 +190,24 @@ rule complete_taxonomy:
 
 rule add_outgroups:
   input:
-    "data/clustered/16S_seqs_centroids.fasta",
-    "data/clustered/18S_seqs_centroids.fasta"
+    "data/final/16S.fasta",
+    "data/final/18S.fasta"
   output:
-    "data/alignment/16S_seqs_outgroup.fasta",
-    "data/alignment/18S_seqs_outgroup.fasta"
+    "data/alignment/16S_outgroup.fasta",
+    "data/alignment/18S_outgroup.fasta"
   script:
     "src/data/add_outgroups.py"
 
 
 rule align_outgrouped_sequences:
   input:
-    bact_outgrouped = "data/alignment/16S_seqs_outgroup.fasta",
-    euk_outgrouped = "data/alignment/18S_seqs_outgroup.fasta",
+    bact_outgrouped = "data/alignment/16S_outgroup.fasta",
+    euk_outgrouped = "data/alignment/18S_outgroup.fasta",
     bact_db = "data/external/aln-dbs/SSURef_NR99_128_SILVA_07_09_16_opt.arb",
     euk_db = "data/external/aln-dbs/SILVA_132_SSURef_NR99_13_12_17_opt.arb"
   output:
-    bact_aligned = "data/alignment/16S_seqs_outgroup_align.fasta",
-    euk_aligned = "data/alignment/18S_seqs_outgroup_align.fasta"
+    bact_aligned = "data/alignment/16S_align.fasta",
+    euk_aligned = "data/alignment/18S_align.fasta"
   conda:
     "envs/sina.yaml"
   shell:
@@ -223,11 +227,11 @@ rule align_outgrouped_sequences:
 
 rule infer_phylogenies:
   input:
-    bact_aligned = "data/alignment/16S_seqs_outgroup_align.fasta",
-    euk_aligned = "data/alignment/18S_seqs_outgroup_align.fasta"
+    bact_aligned = "data/alignment/16S_align.fasta",
+    euk_aligned = "data/alignment/18S_align.fasta"
   output:
-    bact_tree = "data/trees/16S.tre",
-    euk_tree = "data/trees/18S.tre"
+    bact_tree = "data/final/16S.tre",
+    euk_tree = "data/final/18S.tre"
   conda:
     "envs/fasttree.yaml"
   shell:
