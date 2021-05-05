@@ -254,3 +254,19 @@ rule draw_bc_distributions:
     bc_tax_distr="figures/bc_tax_distribution.pdf"
   script:
     "src/data/bc_distr.R"
+
+
+#########
+# Draw tanglegrams
+#########
+
+rule hybrid_mock_distributions:
+  input:
+    bact_bc_tax="data/final/16S_bc_tax.txt",
+    euk_bc_tax="data/final/18S_bc_tax.txt"
+  output:
+    hybrid_mock_bcs="tables/hybrid_mock_bcs.txt",
+  script:
+    "src/data/mock_biol_bcs.R"
+
+
