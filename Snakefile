@@ -239,3 +239,18 @@ rule infer_phylogenies:
     fasttree -nt {input.bact_aligned} > {output.bact_tree} &&\
     fasttree -nt {input.euk_aligned} > {output.euk_tree}
     """
+
+
+#########
+# Prepare barcode distribution visualization
+#########
+
+rule draw_bc_distributions:
+  input:
+    bact_bc_tax="data/final/16S_bc_tax.txt",
+    euk_bc_tax="data/final/18S_bc_tax.txt"
+  output:
+    bc_distr="figures/bc_distribution.pdf",
+    bc_tax_distr="figures/bc_tax_distribution.pdf"
+  script:
+    "src/data/bc_distr.R"
