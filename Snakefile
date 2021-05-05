@@ -285,7 +285,7 @@ rule euk_bact_connections:
 
 
 #########
-# Compute eukaryotic-bacterial connections
+# Compute eukaryotic-chloroplast connections
 #########
 
 rule euk_chloroplast_connections:
@@ -297,11 +297,20 @@ rule euk_chloroplast_connections:
   script:
     "src/data/euk_chloroplast_connections.R"
 
+
 #########
 # Compute OTU abundances
 #########
 
-rule otu_abundances:
+rule count_otu_abundances:
+  input:
+    bact_bc_tax="data/final/16S_bc_tax.txt",
+    euk_bc_tax="data/final/18S_bc_tax.txt"
+  output:
+    bact_abunds="tables/16S_abunds.txt",
+    euk_abunds="tables/18S_abunds.txt"
+  script:
+    "src/data/count_otus.R"
 
 
 #########
