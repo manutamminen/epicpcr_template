@@ -1,5 +1,6 @@
 channels:
   - bioconda
+  - conda-forge
 dependencies:
   - sina >= 1.7.2
   - boost >= 1.73.0
