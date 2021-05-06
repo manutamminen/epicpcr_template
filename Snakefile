@@ -317,6 +317,20 @@ rule count_otu_abundances:
 # Draw tanglegrams
 #########
 
+rule draw_tanglegrams:
+  input:
+    bact_tre="data/final/16S.tre",
+    euk_tre="data/final/18S.tre",
+    connections="tables/nonmock_euk_bact_connections.txt",
+    bact_abunds="tables/16S_abunds.txt",
+    euk_abunds="tables/18S_abunds.txt"
+  output:
+    nonmag="figures/nonmag.pdf",
+    mag="figures/mag.pdf",
+    mock="figures/mock.pdf"
+  script:
+    "src/data/draw_tanglegrams.R"
+
 
 #########
 # Compute mock-biological barcode abundances

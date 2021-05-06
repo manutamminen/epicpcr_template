@@ -4,7 +4,7 @@ library(ape)
 
 
 bact_abund_tips <-
-  read.tree("../../data/final/16S.tre") %>%
+  read.tree(snakemake@input[[1]]) %>%
   .$tip.label %>%
   tibble %>%
   separate(".", c("Taxonomy", "Abundance"), sep="____", remove=FALSE) %>%
@@ -15,14 +15,14 @@ bact_abund_tips <-
 
 
 bact_tre <-
-    read.tree("../../data/final/16S.tre") %>%
+    read.tree(snakemake@input[[1]]) %>%
     keep.tip(bact_abund_tips) %>%
     root(outgroup = "JQ837894.1.1415",
          resolve.root = TRUE)
 
 
 euk_abund_tips <-
-  read.tree("../../data/final/18S.tre") %>%
+  read.tree(snakemake@input[[2]]) %>%
   .$tip.label %>%
   tibble %>%
   separate(".", c("Taxonomy", "Abundance"), sep="____", remove=FALSE) %>%
@@ -33,7 +33,7 @@ euk_abund_tips <-
 
 
 euk_tre <-
-    read.tree("../../data/final/18S.tre") %>%
+    read.tree(snakemake@input[[2]]) %>%
     keep.tip(euk_abund_tips) %>%
     root(outgroup = "Human_18S_rRNA_gene",
          resolve.root = TRUE)
@@ -61,7 +61,7 @@ euk_tip_coords <-
 
 
 connections <-
-    read_tsv("../../tables/nonmock_euk_bact_connections.txt") %>%
+    read_tsv(snakemake@input[[3]]) %>%
     mutate(Eukaryotic_taxonomy = str_replace_all(Eukaryotic_taxonomy, ":", "_"),
            Eukaryotic_taxonomy = str_replace_all(Eukaryotic_taxonomy, "\\(", "__"),
            Eukaryotic_taxonomy = str_replace_all(Eukaryotic_taxonomy, "\\),", "__"),
@@ -77,7 +77,7 @@ connections <-
 
 
 bact_tip_percs <-
-  read_tsv("../../tables/16S_abunds.txt") %>%
+  read_tsv(snakemake@input[[4]]) %>%
   mutate(Taxonomy = str_replace_all(Taxonomy, ":", "_"),
          Taxonomy = str_replace_all(Taxonomy, "\\(", "__"),
          Taxonomy = str_replace_all(Taxonomy, "\\),", "__"),
@@ -89,7 +89,7 @@ bact_tip_percs <-
 
 
 euk_tip_percs <-
-  read_tsv("../../tables/18S_abunds.txt") %>%
+  read_tsv(snakemake@input[[5]]) %>%
   mutate(Taxonomy = str_replace_all(Taxonomy, ":", "_"),
          Taxonomy = str_replace_all(Taxonomy, "\\(", "__"),
          Taxonomy = str_replace_all(Taxonomy, "\\),", "__"),
@@ -100,74 +100,82 @@ euk_tip_percs <-
   mutate(Perc = Count / sum(Count))
 
 
-# 1 Rhodo          10
-# 2 RhodoMagn      15
-# 3 RhodoMock       3
-# 4 WW             52
-# 5 WWMagn         22
-# 6 WWMock          8
-# 7 WWRhodo        29
-# 8 WWRhodoMagn    22
-# 9 WWRhodoMock     7
+samples1 <- c("Rhodo", "WWRhodo", "WW")
+samples2 <- c("RhodoMagn", "WWRhodoMagn", "WWMagn")
+samples3 <- c("RhodoMock", "WWRhodoMock", "WWMock")
 
 
-lmat <-
-    matrix(1:9, ncol = 9)
+tanglegram <- function(samples) {
+  lmat <- matrix(1:9, ncol = 9)
+  layout(lmat, widths = c(1, 1, 1, 1, 3, 1, 1, 1, 1), heights = 1)
+  par(mar=c(1, 1, 1, 1))
 
-layout(lmat, widths = c(1, 1, 1, 1, 3, 1, 1, 1, 1), heights = 1)
+  plot(ladderize(bact_tre), cex = 0.4,
+       align.tip.label = TRUE, show.tip.label = FALSE)
 
-par(mar=c(1, 1, 1, 1))
-
-pdf("tanglegram.pdf")
-
-plot(ladderize(bact_tre), cex = 0.4, align.tip.label = TRUE, show.tip.label = FALSE)
-
-plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
-bact_tip_percs %>%
-    filter(Sample == "Rhodo") %>%
+  plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+  bact_tip_percs %>%
+    filter(Sample == samples[1]) %>%
     with(walk2(Ix, Count, ~ lines(c(0, .y), c(.x, .x))))
 
-plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
-bact_tip_percs %>%
-    filter(Sample == "WWRhodo") %>%
+  plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+  bact_tip_percs %>%
+    filter(Sample == samples[2]) %>%
     with(walk2(Ix, Count, ~ lines(c(0, .y), c(.x, .x))))
 
-plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
-bact_tip_percs %>%
-    filter(Sample == "WW") %>%
+  plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+  bact_tip_percs %>%
+    filter(Sample == samples[3]) %>%
     with(walk2(Ix, Count, ~ lines(c(0, .y), c(.x, .x))))
 
 
-plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+  plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
 
-connections %>%
-    filter(Sample == "Rhodo") %>%
+  connections %>%
+    filter(Sample == samples[1]) %>%
     with(pwalk(list(Ix.x, Ix.y),
                ~ lines(c(0, 1), c(.x, .y), col = alpha("green", 0.05))))
 
-connections %>%
-    filter(Sample == "WWRhodo") %>%
+  connections %>%
+    filter(Sample == samples[2]) %>%
     with(pwalk(list(Ix.x, Ix.y),
                ~ lines(c(0, 1), c(.x, .y), col = alpha("black", 0.05))))
 
-connections %>%
-    filter(Sample == "WW") %>%
+  connections %>%
+    filter(Sample == samples[3]) %>%
     with(pwalk(list(Ix.x, Ix.y),
                ~ lines(c(0, 1), c(.x, .y), col = alpha("red", 0.05))))
 
-plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
-euk_tip_percs %>%
-    filter(Sample == "WW") %>%
+  plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+  euk_tip_percs %>%
+    filter(Sample == samples[3]) %>%
     with(walk2(Ix, Count, ~ lines(c(1, (1 - .y)), c(.x, .x))))
 
-plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
-euk_tip_percs %>%
-    filter(Sample == "WWRhodo") %>%
+  plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+  euk_tip_percs %>%
+    filter(Sample == samples[2]) %>%
     with(walk2(Ix, Count, ~ lines(c(1, (1 - .y)), c(.x, .x))))
 
-plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
-euk_tip_percs %>%
-    filter(Sample == "Rhodo") %>%
+  plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+  euk_tip_percs %>%
+    filter(Sample == samples[1]) %>%
     with(walk2(Ix, Count, ~ lines(c(1, (1 - .y)), c(.x, .x))))
 
-plot(ladderize(euk_tre), align.tip.label = TRUE, direction = "leftwards", show.tip.label = FALSE)
+  plot(ladderize(euk_tre), align.tip.label = TRUE,
+       direction = "leftwards", show.tip.label = FALSE)
+}
+
+pdf(snakemake@output[[1]])
+tanglegram(samples1)
+dev.off()
+
+
+pdf(snakemake@output[[2]])
+tanglegram(samples2)
+dev.off()
+
+
+pdf(snakemake@output[[3]])
+tanglegram(samples3)
+dev.off()
+
