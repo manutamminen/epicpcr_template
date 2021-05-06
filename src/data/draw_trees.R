@@ -1,14 +1,40 @@
+
 library(tidyverse)
 library(ape)
 
+
+bact_abund_tips <-
+  read.tree("../../data/final/16S.tre") %>%
+  .$tip.label %>%
+  tibble %>%
+  separate(".", c("Taxonomy", "Abundance"), sep="____", remove=FALSE) %>%
+  mutate(Abundance = as.numeric(Abundance),
+         Abundance = ifelse(is.na(Abundance), 51, Abundance)) %>%
+  filter(Abundance > 50) %>%
+  pull(".")
+
+
 bact_tre <-
     read.tree("../../data/final/16S.tre") %>%
+    keep.tip(bact_abund_tips) %>%
     root(outgroup = "JQ837894.1.1415",
          resolve.root = TRUE)
 
 
+euk_abund_tips <-
+  read.tree("../../data/final/18S.tre") %>%
+  .$tip.label %>%
+  tibble %>%
+  separate(".", c("Taxonomy", "Abundance"), sep="____", remove=FALSE) %>%
+  mutate(Abundance = as.numeric(Abundance),
+         Abundance = ifelse(is.na(Abundance), 51, Abundance)) %>%
+  filter(Abundance > 50) %>%
+  pull(".")
+
+
 euk_tre <-
     read.tree("../../data/final/18S.tre") %>%
+    keep.tip(euk_abund_tips) %>%
     root(outgroup = "Human_18S_rRNA_gene",
          resolve.root = TRUE)
 
@@ -27,14 +53,16 @@ bact_tip_coords <-
   separate(Tip, c("Taxonomy", "Abundance"), sep="____") %>%
   select(-Abundance)
 
+
 euk_tip_coords <-
   tip_coord(euk_tre) %>%
   separate(Tip, c("Taxonomy", "Abundance"), sep="____") %>%
   select(-Abundance)
 
+
 connections <-
     read_tsv("../../tables/nonmock_euk_bact_connections.txt") %>%
-    mutate( Eukaryotic_taxonomy = str_replace_all(Eukaryotic_taxonomy, ":", "_"),
+    mutate(Eukaryotic_taxonomy = str_replace_all(Eukaryotic_taxonomy, ":", "_"),
            Eukaryotic_taxonomy = str_replace_all(Eukaryotic_taxonomy, "\\(", "__"),
            Eukaryotic_taxonomy = str_replace_all(Eukaryotic_taxonomy, "\\),", "__"),
            Eukaryotic_taxonomy = str_replace_all(Eukaryotic_taxonomy, "\\)", ""),
