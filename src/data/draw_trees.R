@@ -122,20 +122,20 @@ pdf("tanglegram.pdf")
 
 plot(ladderize(bact_tre), cex = 0.4, align.tip.label = TRUE, show.tip.label = FALSE)
 
-plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
 bact_tip_percs %>%
     filter(Sample == "Rhodo") %>%
-    with(walk2(Ix, Perc, ~ lines(c(0, .y), c(.x, .x))))
+    with(walk2(Ix, Count, ~ lines(c(0, .y), c(.x, .x))))
 
-plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
 bact_tip_percs %>%
     filter(Sample == "WWRhodo") %>%
-    with(walk2(Ix, Perc, ~ lines(c(0, .y), c(.x, .x))))
+    with(walk2(Ix, Count, ~ lines(c(0, .y), c(.x, .x))))
 
-plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+plot(NULL, xlim = c(0, 1e4), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
 bact_tip_percs %>%
     filter(Sample == "WW") %>%
-    with(walk2(Ix, Perc, ~ lines(c(0, .y), c(.x, .x))))
+    with(walk2(Ix, Count, ~ lines(c(0, .y), c(.x, .x))))
 
 
 plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
@@ -155,19 +155,19 @@ connections %>%
     with(pwalk(list(Ix.x, Ix.y),
                ~ lines(c(0, 1), c(.x, .y), col = alpha("red", 0.05))))
 
-plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
 euk_tip_percs %>%
     filter(Sample == "WW") %>%
-    with(walk2(Ix, Perc, ~ lines(c(1, (1 - .y)), c(.x, .x))))
+    with(walk2(Ix, Count, ~ lines(c(1, (1 - .y)), c(.x, .x))))
 
-plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
 euk_tip_percs %>%
     filter(Sample == "WWRhodo") %>%
-    with(walk2(Ix, Perc, ~ lines(c(1, (1 - .y)), c(.x, .x))))
+    with(walk2(Ix, Count, ~ lines(c(1, (1 - .y)), c(.x, .x))))
 
-plot(NULL, xlim = c(0, 1), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
+plot(NULL, xlim = c(-1e4, 0), ylim = c(0, 1), type='n', axes=FALSE, ann=FALSE)
 euk_tip_percs %>%
     filter(Sample == "Rhodo") %>%
-    with(walk2(Ix, Perc, ~ lines(c(1, (1 - .y)), c(.x, .x))))
+    with(walk2(Ix, Count, ~ lines(c(1, (1 - .y)), c(.x, .x))))
 
 plot(ladderize(euk_tre), align.tip.label = TRUE, direction = "leftwards", show.tip.label = FALSE)
