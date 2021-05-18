@@ -155,8 +155,8 @@ rule collapse_taxonomy:
     "data/taxonomy/18S_seqs_centroids_tax.txt",
     "data/clustered/18S_seqs_centroids.fasta"
   output:
-    "data/taxonomy/16S_otu_sequences.txt",
-    "data/taxonomy/18S_otu_sequences.txt"
+    temp("data/taxonomy/16S_otu_sequences.txt"),
+    temp("data/taxonomy/18S_otu_sequences.txt")
   script:
     "src/data/collapse_taxonomy.py"
 
@@ -254,20 +254,6 @@ rule infer_phylogenies:
 # SUMMARIES AND VISUALIZATION
 ####################################
 
-#########
-# Prepare barcode distribution visualization
-#########
-
-rule draw_bc_distributions:
-  input:
-    bact_bc_tax="data/final/16S_bc_tax.txt",
-    euk_bc_tax="data/final/18S_bc_tax.txt"
-  output:
-    bc_distr="figures/bc_distribution.pdf",
-    bc_tax_distr="figures/bc_tax_distribution.pdf"
-  script:
-    "src/data/bc_distr.R"
-
 
 #########
 # Compute eukaryotic-bacterial connections
@@ -314,6 +300,34 @@ rule count_otu_abundances:
 
 
 #########
+# Prepare barcode distribution visualization
+#########
+
+rule draw_bc_distributions:
+  input:
+    bact_bc_tax="data/final/16S_bc_tax.txt",
+    euk_bc_tax="data/final/18S_bc_tax.txt"
+  output:
+    bc_distr="figures/bc_distribution.pdf",
+    bc_tax_distr="figures/bc_tax_distribution.pdf"
+  script:
+    "src/data/bc_distr.R"
+
+
+#########
+# Draw connection_distributions
+#########
+
+rule connection_distribution:
+  input:
+    connections="tables/nonmock_euk_bact_connections.txt",
+  output:
+    nonmag="figures/connection_distribution.pdf",
+  script:
+    "src/data/connection_distribution.R"
+
+
+#########
 # Draw tanglegrams
 #########
 
@@ -330,6 +344,7 @@ rule draw_tanglegrams:
     mock="figures/mock.pdf"
   script:
     "src/data/draw_tanglegrams.R"
+
 
 
 #########
